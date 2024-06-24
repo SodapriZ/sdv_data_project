@@ -1,45 +1,34 @@
-import requests
-from bs4 import BeautifulSoup
-import json
-import os
 import logging
-from unidecode import unidecode
+from extract.web_scrapping.setup_driver import setup_driver, get_last_page_number
+from extract.web_scrapping.fetch_page import scrape_page
+from extract.web_scrapping.save_to_json import save_to_json
 
+# URL of the page to scrape
+BASE_URL = 'https://www.maxicoffee.com/tous-cafes-grain-c-58_1361.html?sort_products=name_asc'
 
-from extract.web_scrapping.extract_with_bs4 import fetch_page_content, parse_recipe_page, save_recipe_to_json
+def extract():
+    driver = setup_driver()
+    try:
+        last_page_number = get_last_page_number(driver, BASE_URL)
+        logging.info(f"Total number of pages: {last_page_number}")
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        all_scraped_data = []
 
-# List of recipes with title, URL, and refresh date
-recipes_list = [
-    {"title": "Recette de Crêpes", "url": "https://cuisine.journaldesfemmes.fr/recette/333415-recette-de-crepes-la-meilleure-recette-rapide", "refresh_date": "2024-06-24"},
-    {"title": "Recette de Crêpes", "url": "https://cuisine.journaldesfemmes.fr/recette/333415-recette-de-crepes-la-meilleure-recette-rapide", "refresh_date": "2024-06-24"},
-]
+        for page_number in range(1, last_page_number + 2):
+            current_url = f"{BASE_URL}&page={page_number}"
+            logging.info(f"Scraping page {page_number}: {current_url}")
+            scraped_data = scrape_page(driver, current_url)
+            all_scraped_data.extend(scraped_data)
+        
+        save_to_json(all_scraped_data, './data/1_bronze/scraped_data.json')
 
-def extract(url, filepath):
-    html_content = fetch_page_content(url)
-    recipe_data = parse_recipe_page(html_content)
-    save_recipe_to_json(recipe_data, filepath)
+    finally:
+        driver.quit()
 
-    # Print the scraped data (optional)
-    print("Titre de la recette:", recipe_data['recipe_title'])
-    print("\nIngrédients:")
-    for ing in recipe_data['ingredients']:
-        if isinstance(ing, dict):
-            print(f"- {ing['quantity']} {ing['name']}")
-        else:
-            print(f"- {ing}")
-
-    print("\nÉtapes de préparation:")
-    for i, etape in enumerate(recipe_data['steps'], start=1):
-        print(f"{i}. {etape}")
-
-def main (recipes_list):
-    for recipe in recipes_list:
-        url = recipe['url']
-        bronze_path = f'./data/1_bronze/{unidecode(recipe.get("title").lower().replace(' ','_'))}.json'
-        extract(url, bronze_path)
+def main():
+    logging.basicConfig(level=logging.INFO)
+    extract()
+    
 
 if __name__ == "__main__":
-    main(recipes_list)
+    main()
