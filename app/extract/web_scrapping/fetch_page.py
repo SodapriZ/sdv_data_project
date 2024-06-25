@@ -37,12 +37,17 @@ def scrape_page(driver, url):
             if img_tag:
                 alt_text = img_tag.get_attribute('alt')
                 commerce_details.append(alt_text)
-
-        scraped_data.append({
-            'Title': title,
-            'Reviews': reviews,
-            'Price': price,
-            'Commerce Details': commerce_details
-        })
+        
+        commerce_details_str = ', '.join(commerce_details)
+        
+        if commerce_details and price:
+            scraped_data.append({
+                'Title': title,
+                'Reviews': reviews,
+                'Price': price,
+                'Commerce Details': commerce_details_str
+            })
+        else:
+            pass
 
     return scraped_data

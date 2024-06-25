@@ -1,7 +1,14 @@
 import logging
+
 from extract.web_scrapping.setup_driver import setup_driver, get_last_page_number
 from extract.web_scrapping.fetch_page import scrape_page
 from extract.web_scrapping.save_to_json import save_to_json
+
+from transform.clean_data import clean_data
+from transform.extract_column import extract_columns
+from transform.load_data import load_data
+from transform.save_dataframe_to_json import save_dataframe_to_json
+from transform.setup_spark import initialize_spark
 
 # URL of the page to scrape
 BASE_URL = 'https://www.maxicoffee.com/tous-cafes-grain-c-58_1361.html?sort_products=name_asc'
@@ -25,9 +32,41 @@ def extract():
     finally:
         driver.quit()
 
+def transform():
+    # Initialize Spark session
+    spark = initialize_spark("CoffeeDataTransformation")
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    
+    # Define the path to the JSON file
+    file_path = "./data/1_bronze/scraped_data.json"
+    
+    try:
+        # Load JSON data into DataFrame
+        df = load_data(spark, file_path)
+        
+        # Extract and transform columns
+        df = extract_columns(df)
+        
+        # Clean and preprocess data
+        df_cleaned = clean_data(df)
+        
+        # Show the transformed data (optional)
+        logging.info("Transformed data:")
+        df_cleaned.show(truncate=False)
+        
+        # Write DataFrame to JSON file
+        output_path = "./data/2_silver/cleaned_data.json"
+        save_dataframe_to_json(df_cleaned, output_path)
+        
+    except Exception as e:
+        logging.error(f"Error transforming data: {e}")
+        raise
+    
+
 def main():
     logging.basicConfig(level=logging.INFO)
     extract()
+    transform()
     
 
 if __name__ == "__main__":
