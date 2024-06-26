@@ -1,6 +1,6 @@
 import logging
 
-def write_data_to_mongo(df):
+def write_dataframe_to_mongo(df):
     """Write DataFrame to MongoDB."""
     try:
         df.write.format("mongo").mode("append") \
