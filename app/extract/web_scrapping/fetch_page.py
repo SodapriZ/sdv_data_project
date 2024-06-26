@@ -1,6 +1,5 @@
 from selenium.webdriver.common.by import By
 import time
-import logging
 
 def scrape_page(driver, url):
     """Scrape data from a single page."""

@@ -49,8 +49,14 @@ pip install -r requirements.txt
 ```
 
 ## Exécution :
-Pour exécuter le script principal :
+Pour executer le serveur mongodb :
+```sh
+docker-compose up
+```
 
+Ajouter le mongo-spark-connector.jar disponible dans ./extra dans le dossier .venv/lib/site-packages/pyspark/jars/
+
+Pour exécuter le script principal :
 ```sh
 python .\app\main.py
 ```

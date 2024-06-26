@@ -10,6 +10,8 @@ from transform.load_data import load_data
 from transform.save_dataframe_to_json import save_dataframe_to_json
 from transform.setup_spark import initialize_spark
 
+from load.write_data import write_data_to_mongo
+
 # URL of the page to scrape
 BASE_URL = 'https://www.maxicoffee.com/tous-cafes-grain-c-58_1361.html?sort_products=name_asc'
 
@@ -54,19 +56,21 @@ def transform():
         logging.info("Transformed data:")
         df_cleaned.show(truncate=False)
         
-        # Write DataFrame to JSON file
-        output_path = "./data/2_silver/cleaned_data.json"
-        save_dataframe_to_json(df_cleaned, output_path)
+        return df_cleaned
         
     except Exception as e:
         logging.error(f"Error transforming data: {e}")
         raise
-    
+
+def load(df):
+    # Write data to MongoDB
+    write_data_to_mongo(df)
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    extract()
-    transform()
+    # extract()
+    df = transform()
+    load(df)
     
 
 if __name__ == "__main__":
