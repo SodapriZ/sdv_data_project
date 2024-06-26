@@ -33,14 +33,13 @@ cd votre-projet
 
 - Sur Windows :
 ```sh
-python -m venv .venv
-.venv\Scripts\activate
+pip install virtualenv
+virtualenv --python=C:\Users\sodap\AppData\Local\Programs\Python\Python310\python.exe .venv
 ```
  - Sur macOS/Linux :
 ```sh
-Copier le code
-python -m venv .venv
-source .venv/bin/activate
+pip install virtualenv
+virtualenv --python=C:\Users\sodap\AppData\Local\Programs\Python\Python310\python.exe .venv
 ```
 3. **Installez les dépendances :**
 
